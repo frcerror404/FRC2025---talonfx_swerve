@@ -28,20 +28,28 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.ClawIO;
+import frc.robot.subsystems.claw.ClawIOSim;
+import frc.robot.subsystems.claw.ClawIOTalonFX;
 import frc.robot.subsystems.clawAngle.ClawAngle;
 import frc.robot.subsystems.clawAngle.ClawAngleIO;
+import frc.robot.subsystems.clawAngle.ClawAngleIOSim;
+import frc.robot.subsystems.clawAngle.ClawAngleIOTalonFX;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOSim;
+import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
+import frc.robot.subsystems.elevator.ElevatorIOSim;
+import frc.robot.subsystems.elevator.ElevatorRightIOTalonFX;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -59,7 +67,6 @@ public class RobotContainer {
   private final Climber climber;
   private final Claw claw;
   private final ClawAngle clawAngle;
-
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -87,22 +94,13 @@ public class RobotContainer {
                 new VisionIOPhotonVision(camera0Name, robotToCamera0),
                 new VisionIOPhotonVision(camera1Name, robotToCamera1));
 
-        elevator =
-            new Elevator(
-                new ModuleIOTalonFX(),
-                new ModuleIOTalonFX());
+        elevator = new Elevator(new ElevatorRightIOTalonFX());
 
-        climber = 
-            new Climber(
-                new ModuleIOTalonFX());
+        climber = new Climber(new ClimberIOTalonFX());
 
-        clawAngle = 
-            new ClawAngle(
-                new ModuleIOTalonFX());
+        clawAngle = new ClawAngle(new ClawAngleIOTalonFX());
 
-        claw = 
-            new Claw(
-                new ModuleIOTalonFX());
+        claw = new Claw(new ClawIOTalonFX());
 
         break;
 
@@ -122,24 +120,14 @@ public class RobotContainer {
                 new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
 
-        elevator =
-            new Elevator(
-                new ModuleIOTalonFX(),
-                new ModuleIOTalonFX());
+        elevator = new Elevator(new ElevatorIOSim());
 
-                
-        climber = 
-            new Climber(
-                new ModuleIOTalonFX());
+        climber = new Climber(new ClimberIOSim());
 
-        clawAngle = 
-            new ClawAngle(
-                new ModuleIOTalonFX());
+        clawAngle = new ClawAngle(new ClawAngleIOSim());
 
-        claw = 
-            new Claw(
-                new ModuleIOTalonFX());
-            break;
+        claw = new Claw(new ClawIOSim());
+        break;
 
       default:
         // Replayed robot, disable IO implementations
@@ -152,30 +140,17 @@ public class RobotContainer {
                 new ModuleIO() {});
 
         // (Use same number of dummy implementations as the real robot)
-        vision = new Vision(
-            drive::addVisionMeasurement, 
-            new VisionIO() {}, 
-            new VisionIO() {});
+        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
 
-        elevator =
-            new Elevator(
-                new ModuleIOTalonFX(),
-                new ModuleIOTalonFX()
-            );
+        elevator = new Elevator(new ElevatorIO() {});
 
-        climber = 
-        new Climber(
-            new ModuleIOTalonFX());
+        climber = new Climber(new ClimberIO() {});
 
-        clawAngle = 
-            new ClawAngle(
-                new ModuleIOTalonFX());
+        clawAngle = new ClawAngle(new ClawAngleIO() {});
 
-        claw = 
-            new Claw(
-                new ModuleIOTalonFX());
-            break;
-        }
+        claw = new Claw(new ClawIO() {});
+        break;
+    }
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -215,15 +190,8 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
-    // Lock to 0° when A button is held
-    controller
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> new Rotation2d()));
+    // Elevator to Setpoint
+    controller.a().whileTrue(elevator.enableForward());
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
