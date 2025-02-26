@@ -96,7 +96,7 @@ public class RobotState extends VirtualSubsystem {
     this.elevatorHeight.mut_replace(elevatorHeight);
   }
 
-  public void setShoulderAngle(Angle clawAngle) {
+  public void setClawAngle(Angle clawAngle) {
     this.clawAngle.mut_replace(clawAngle);
   }
 

@@ -16,6 +16,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -48,7 +49,7 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
-import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.AprilTagVision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
@@ -81,15 +82,19 @@ public class RobotContainer {
   private final CommandXboxController controller = new CommandXboxController(0);
   private final CommandXboxController co_controller = new CommandXboxController(1);
 
+  private final AprilTagVision vision;
+
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
   private RobotState robotState;
   private ReefPositionsUtil reefPositions;
 
+  private boolean m_TeleopInitialized = false;
+
+  final LoggedTunableNumber setClawAngle =
+      new LoggedTunableNumber("RobotState/ClawAngle/setClawAngle", 0);
   final LoggedTunableNumber setClimberVolts =
       new LoggedTunableNumber("dashboardKey:RobotState/Climber/setVolts", 0);
-
-  private final Vision vision;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -108,7 +113,8 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
         vision =
-            new Vision(
+            new AprilTagVision(
+                drive::setPose,
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVision(camera0Name, robotToCamera0),
                 new VisionIOPhotonVision(camera1Name, robotToCamera1));
@@ -142,7 +148,8 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackRight));
 
         vision =
-            new Vision(
+            new AprilTagVision(
+                drive::setPose,
                 drive::addVisionMeasurement,
                 new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
@@ -182,7 +189,9 @@ public class RobotContainer {
                 new ModuleIO() {});
 
         // (Use same number of dummy implementations as the real robot)
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        vision =
+            new AprilTagVision(
+                drive::setPose, drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
 
         elevator = null;
 
@@ -211,6 +220,8 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+    reefPositions = ReefPositionsUtil.getInstance();
 
     // Configure the button bindings
     configureButtonBindings();
@@ -271,5 +282,18 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  public void teleopInit() {
+    if (!this.m_TeleopInitialized) {
+      // Only want to initialize starting position once (if teleop multiple times dont reset pose
+      // again)
+      vision.updateStartingPosition();
+      // Turn on updating odometry based on Apriltags
+      vision.enableUpdateOdometryBasedOnApriltags();
+      m_TeleopInitialized = true;
+      SignalLogger.setPath("/media/sda1/");
+      SignalLogger.start();
+    }
   }
 }
