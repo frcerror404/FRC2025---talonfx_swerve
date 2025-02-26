@@ -13,13 +13,17 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -27,23 +31,32 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.claw.Claw;
-import frc.robot.subsystems.claw.ClawIO;
+import frc.robot.subsystems.claw.ClawIOSim;
+import frc.robot.subsystems.claw.ClawIOTalonFX;
 import frc.robot.subsystems.clawAngle.ClawAngle;
-import frc.robot.subsystems.clawAngle.ClawAngleIO;
+import frc.robot.subsystems.clawAngle.ClawAngleIOSim;
+import frc.robot.subsystems.clawAngle.ClawAngleIOTalonFX;
 import frc.robot.subsystems.climber.Climber;
-import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOSim;
+import frc.robot.subsystems.climber.ClimberIOTalonFX;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.ElevatorIOSim;
+import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.elevator.Elevator;
-import frc.robot.subsystems.elevator.ElevatorIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.util.CanDef;
+import frc.robot.util.CanDef.CanBus;
+import frc.robot.util.LoggedTunableNumber;
+import frc.robot.util.ReefPositionsUtil;
+import frc.robot.util.ReefPositionsUtil.*;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -55,22 +68,35 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Elevator elevator;
-  private final Climber climber;
-  private final Claw claw;
-  private final ClawAngle clawAngle;
 
+  private final Elevator elevator;
+
+  private final Climber climber;
+
+  private final Claw claw;
+
+  private final ClawAngle clawAngle;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController co_controller = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+  private RobotState robotState;
+  private ReefPositionsUtil reefPositions;
+
+  final LoggedTunableNumber setClimberVolts =
+      new LoggedTunableNumber("dashboardKey:RobotState/Climber/setVolts", 0);
 
   private final Vision vision;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+    CanDef.Builder canivoreCanBuilder = CanDef.builder().bus(CanBus.CANivore);
+    CanDef.Builder rioCanBuilder = CanDef.builder().bus(CanBus.Rio);
+
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -89,20 +115,19 @@ public class RobotContainer {
 
         elevator =
             new Elevator(
-                new ModuleIOTalonFX(),
-                new ModuleIOTalonFX());
+                new ElevatorIOTalonFX(rioCanBuilder.id(1).build(), rioCanBuilder.id(2).build()));
 
-        climber = 
-            new Climber(
-                new ModuleIOTalonFX());
+        climber = new Climber(new ClimberIOTalonFX(canivoreCanBuilder.id(2).build()));
 
-        clawAngle = 
-            new ClawAngle(
-                new ModuleIOTalonFX());
-
-        claw = 
+        claw =
             new Claw(
-                new ModuleIOTalonFX());
+                new ClawIOTalonFX(
+                    canivoreCanBuilder.id(1).build(), canivoreCanBuilder.id(3).build()));
+
+        clawAngle =
+            new ClawAngle(
+                new ClawAngleIOTalonFX(
+                    canivoreCanBuilder.id(4).build(), canivoreCanBuilder.id(5).build()));
 
         break;
 
@@ -124,22 +149,27 @@ public class RobotContainer {
 
         elevator =
             new Elevator(
-                new ModuleIOTalonFX(),
-                new ModuleIOTalonFX());
+                new ElevatorIOSim(
+                    4,
+                    new ElevatorSim(
+                        LinearSystemId.createElevatorSystem(
+                            DCMotor.getKrakenX60Foc(2),
+                            Pounds.of(45).in(Kilograms),
+                            Inches.of(Elevator.SPOOL_RADIUS).in(Meters),
+                            Elevator.REDUCTION),
+                        DCMotor.getKrakenX60Foc(2),
+                        Inches.of(0).in(Meters),
+                        Inches.of(32).in(Meters),
+                        true,
+                        Inches.of(0).in(Meters))));
 
-                
-        climber = 
-            new Climber(
-                new ModuleIOTalonFX());
+        climber = new Climber(new ClimberIOSim(0));
 
-        clawAngle = 
-            new ClawAngle(
-                new ModuleIOTalonFX());
+        claw = new Claw(new ClawIOSim(0));
 
-        claw = 
-            new Claw(
-                new ModuleIOTalonFX());
-            break;
+        clawAngle = new ClawAngle(new ClawAngleIOSim(0));
+
+        break;
 
       default:
         // Replayed robot, disable IO implementations
@@ -152,30 +182,16 @@ public class RobotContainer {
                 new ModuleIO() {});
 
         // (Use same number of dummy implementations as the real robot)
-        vision = new Vision(
-            drive::addVisionMeasurement, 
-            new VisionIO() {}, 
-            new VisionIO() {});
+        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
 
-        elevator =
-            new Elevator(
-                new ModuleIOTalonFX(),
-                new ModuleIOTalonFX()
-            );
+        elevator = null;
 
-        climber = 
-        new Climber(
-            new ModuleIOTalonFX());
+        climber = null;
 
-        clawAngle = 
-            new ClawAngle(
-                new ModuleIOTalonFX());
+        claw = null;
 
-        claw = 
-            new Claw(
-                new ModuleIOTalonFX());
-            break;
-        }
+        clawAngle = null;
+    }
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -215,15 +231,7 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
-    // Lock to 0° when A button is held
-    controller
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> new Rotation2d()));
+    // co_controller.rightTrigger().whileTrue(elevator.getNewSetDistanceCommand(set));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
@@ -244,9 +252,9 @@ public class RobotContainer {
     //             },
     //             drive));
 
-    // Reset gyro to 0° when B button is pressed
+    // Reset gyro to 0° when start button is pressed
     controller
-        .b()
+        .start()
         .onTrue(
             Commands.runOnce(
                     () ->
