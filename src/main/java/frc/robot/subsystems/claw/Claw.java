@@ -7,11 +7,16 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+
 import org.littletonrobotics.junction.Logger;
 
 public class Claw extends SubsystemBase {
+  private static final Distance SENSOR_TRIGGER_DISTANCE = Inches.of(2.0);
+
   private ClawIO m_ClawIO;
 
   ClawIOInputsAutoLogged logged = new ClawIOInputsAutoLogged();
@@ -30,6 +35,14 @@ public class Claw extends SubsystemBase {
     return () -> false;
   }
 
+  public Command getNewSetVoltsCommand(DoubleSupplier volts) {
+    return new InstantCommand(
+        () -> {
+          setTarget(Volts.of((volts.getAsDouble())));
+        },
+        this);
+  }
+
   public void setTarget(Voltage target) {
     m_ClawIO.setTarget(target);
   }
@@ -38,20 +51,18 @@ public class Claw extends SubsystemBase {
     return m_ClawIO.getDistance();
   }
 
-  public Command getNewSetVoltsCommand(LoggedTunableNumber volts) {
-    return new InstantCommand(
-        () -> {
-          setTarget(Volts.of((volts.get())));
-        },
-        this);
-  }
-
   public Command getNewSetVoltsCommand(double i) {
     return new InstantCommand(
         () -> {
           setTarget(Volts.of(i));
         },
         this);
+  }
+
+  public Trigger getHasGamepieceTrigger() {
+    return new Trigger(
+      () -> getDistance().lte(SENSOR_TRIGGER_DISTANCE)
+    );
   }
 
   @Override

@@ -8,13 +8,14 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.MutDistance;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
+import frc.robot.util.LoggedTunableNumber;
 
 public class ClawIOSim implements ClawIO {
 
   private Voltage appliedVoltage = Volts.mutable(0);
 
   private final FlywheelSim sim;
-  private MutDistance intakesensorDistance;
+  private LoggedTunableNumber intakesensorDistance;
 
   public ClawIOSim(int motorId) {
     sim =
@@ -22,7 +23,7 @@ public class ClawIOSim implements ClawIO {
             LinearSystemId.createFlywheelSystem(DCMotor.getKrakenX60Foc(1), 0.0005, 1),
             DCMotor.getKrakenX60Foc(1),
             0.01);
-    intakesensorDistance = Meters.mutable(1);
+    intakesensorDistance = new LoggedTunableNumber("RobotState/Claw/setSensorInputInches", 2.0);
   }
 
   @Override
@@ -42,7 +43,7 @@ public class ClawIOSim implements ClawIO {
     input.supplyCurrent.mut_replace(sim.getCurrentDrawAmps(), Amps);
     input.torqueCurrent.mut_replace(input.supplyCurrent.in(Amps), Amps);
     input.voltageSetPoint.mut_replace(appliedVoltage);
-    input.sensorDistance.mut_replace(intakesensorDistance);
+    input.sensorDistance.mut_replace(Inches.of(intakesensorDistance.get()));
 
     // Periodic
     sim.setInputVoltage(appliedVoltage.in(Volts));
@@ -55,6 +56,6 @@ public class ClawIOSim implements ClawIO {
 
   @Override
   public Distance getDistance() {
-    return intakesensorDistance.copy();
+    return Inches.of(intakesensorDistance.get());
   }
 }
