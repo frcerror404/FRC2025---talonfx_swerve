@@ -21,12 +21,12 @@ public class Elevator extends SubsystemBase {
 
   public static final double SPOOL_RADIUS = 1.751 / 2.0;
 
-  public static final double INCHES_PER_ROT = (2.0 * Math.PI * SPOOL_RADIUS);
+  public static final double INCHES_PER_ROT = (Math.PI * SPOOL_RADIUS * .85);
 
-  public static final double REDUCTION = (3.0 / 1.0);
+  public static final double REDUCTION = (5.0 / 1.0); // 5:1 Reduction
 
   public LoggedTunableGainsBuilder tunableGains =
-      new LoggedTunableGainsBuilder("Elevator", 3.0, 0, 0, 0, 0.8, 0, 0, 80.0, 60.0, 0, 0, 0);
+      new LoggedTunableGainsBuilder("Elevator", 8.0, 2, 0, 0, 0.72, 0, 0, 80.0, 90.0, 0, 0, 0);
 
   public Elevator(ElevatorIO ElevatorIO) {
     m_ElevatorIO = ElevatorIO;
@@ -76,6 +76,13 @@ public class Elevator extends SubsystemBase {
               loggedelevator.distance.baseUnitMagnitude(),
               tolerance.baseUnitMagnitude());
         });
+  }
+
+  public boolean isElevatorAtDistance(Distance dist, Distance tolerance) {
+    return MathUtil.isNear(
+        dist.baseUnitMagnitude(),
+        loggedelevator.distance.baseUnitMagnitude(),
+        tolerance.baseUnitMagnitude());
   }
 
   @Override

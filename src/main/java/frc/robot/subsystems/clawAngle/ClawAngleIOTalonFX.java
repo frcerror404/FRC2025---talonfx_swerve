@@ -1,6 +1,5 @@
 package frc.robot.subsystems.clawAngle;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -25,33 +24,37 @@ public class ClawAngleIOTalonFX implements ClawAngleIO {
   public CoastOut coastRequest;
   public TalonFX Motor;
   public CANcoder canCoder;
-  public Angle canCoderOffset = Degrees.of(26.5);
-  private Angle m_setPoint = Angle.ofRelativeUnits(0, Rotations);
+  public Angle canCoderOffset = Rotations.of(0.108);
+  private Angle m_setPoint = Angle.ofRelativeUnits(.0, Rotations);
 
-  public ClawAngleIOTalonFX(CanDef canbus, CanDef canCoderDef) {
-    Motor = new TalonFX(canbus.id(), canbus.bus());
-    Request = new MotionMagicVoltage(0);
+  public ClawAngleIOTalonFX(CanDef motorId, CanDef canCoderId) {
+    Motor = new TalonFX(motorId.id(), motorId.bus());
+    Request = new MotionMagicVoltage(canCoderOffset);
     coastRequest = new CoastOut();
-    canCoder = new CANcoder(canCoderDef.id(), canCoderDef.bus());
+    canCoder = new CANcoder(canCoderId.id(), canCoderId.bus());
 
     configureTalons();
   }
 
   private void configureTalons() {
     TalonFXConfiguration config = new TalonFXConfiguration();
-    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    config.Voltage.PeakForwardVoltage = 7;
-    config.Voltage.PeakReverseVoltage = 7;
-    config.CurrentLimits.StatorCurrentLimit = 80;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+    config.Voltage.PeakForwardVoltage = 16;
+    config.Voltage.PeakReverseVoltage = -16;
+    config.CurrentLimits.StatorCurrentLimit = 20;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 40;
+    config.CurrentLimits.SupplyCurrentLimit = 10;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     config.Feedback.FeedbackRemoteSensorID = canCoder.getDeviceID();
-    config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+    config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
     config.Feedback.SensorToMechanismRatio = 1.0;
-    config.Feedback.RotorToSensorRatio = 9.0;
-    config.ClosedLoopGeneral.ContinuousWrap = true;
+    config.Feedback.RotorToSensorRatio = 58.333;
+    config.ClosedLoopGeneral.ContinuousWrap = false;
+    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = .29;
+    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -.26;
+    config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
     config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 

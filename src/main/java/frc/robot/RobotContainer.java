@@ -29,7 +29,16 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.Mode;
+import frc.robot.commands.ClawAngleAvoidElevator;
+import frc.robot.commands.ClawAngleHome;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.IntakeCoral;
+import frc.robot.commands.PositionL2;
+import frc.robot.commands.PositionL3;
+import frc.robot.commands.PositionL4;
+import frc.robot.commands.StopIntake;
+import frc.robot.commands.StowHome;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.ClawIOSim;
@@ -79,8 +88,8 @@ public class RobotContainer {
   private final ClawAngle clawAngle;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
-  private final CommandXboxController co_controller = new CommandXboxController(1);
+  private final CommandXboxController driver = new CommandXboxController(0);
+  private final CommandXboxController operator = new CommandXboxController(1);
 
   private final AprilTagVision vision;
 
@@ -102,7 +111,8 @@ public class RobotContainer {
     CanDef.Builder canivoreCanBuilder = CanDef.builder().bus(CanBus.CANivore);
     CanDef.Builder rioCanBuilder = CanDef.builder().bus(CanBus.Rio);
 
-    switch (Constants.currentMode) {
+    switch (
+    /*Constants.currentMode*/ Mode.REAL) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
         drive =
@@ -121,19 +131,16 @@ public class RobotContainer {
 
         elevator =
             new Elevator(
-                new ElevatorIOTalonFX(rioCanBuilder.id(1).build(), rioCanBuilder.id(2).build()));
+                new ElevatorIOTalonFX(rioCanBuilder.id(51).build(), rioCanBuilder.id(52).build()));
 
-        climber = new Climber(new ClimberIOTalonFX(canivoreCanBuilder.id(2).build()));
+        climber = new Climber(new ClimberIOTalonFX(rioCanBuilder.id(10).build()));
 
         claw =
-            new Claw(
-                new ClawIOTalonFX(
-                    canivoreCanBuilder.id(1).build(), canivoreCanBuilder.id(3).build()));
+            new Claw(new ClawIOTalonFX(rioCanBuilder.id(24).build(), rioCanBuilder.id(25).build()));
 
         clawAngle =
             new ClawAngle(
-                new ClawAngleIOTalonFX(
-                    canivoreCanBuilder.id(4).build(), canivoreCanBuilder.id(5).build()));
+                new ClawAngleIOTalonFX(rioCanBuilder.id(20).build(), rioCanBuilder.id(26).build()));
 
         break;
 
@@ -237,15 +244,12 @@ public class RobotContainer {
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+            drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
 
     // co_controller.rightTrigger().whileTrue(elevator.getNewSetDistanceCommand(set));
 
     // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    driver.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // // Auto aim command example
     // @SuppressWarnings("resource")
@@ -264,7 +268,7 @@ public class RobotContainer {
     //             drive));
 
     // Reset gyro to 0° when start button is pressed
-    controller
+    driver
         .start()
         .onTrue(
             Commands.runOnce(
@@ -273,6 +277,24 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                     drive)
                 .ignoringDisable(true));
+
+    operator
+        .a()
+        .whileTrue(new PositionL2(clawAngle, elevator))
+        .whileFalse(new StowHome(elevator, clawAngle));
+    operator
+        .b()
+        .whileTrue(new PositionL3(clawAngle, elevator))
+        .whileFalse(new StowHome(elevator, clawAngle));
+    operator
+        .y()
+        .whileTrue(new PositionL4(clawAngle, elevator))
+        .whileFalse(new StowHome(elevator, clawAngle));
+    operator.leftBumper().whileTrue(new IntakeCoral(claw)).whileFalse(new StopIntake(claw));
+    operator
+        .rightBumper()
+        .whileTrue(new ClawAngleAvoidElevator(clawAngle))
+        .whileFalse(new ClawAngleHome(clawAngle));
   }
 
   /**

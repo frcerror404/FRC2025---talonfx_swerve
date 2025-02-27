@@ -5,7 +5,7 @@ import frc.robot.subsystems.claw.Claw;
 
 public class OutakeCoral extends SequentialCommandGroup {
   public OutakeCoral(Claw claw) {
-    super(claw.getNewSetVoltsCommand(-6));
+    super(claw.getNewSetVoltsCommand(6));
     addRequirements(claw);
   }
 }

@@ -8,10 +8,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.util.LoggedTunableNumber;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-
 import org.littletonrobotics.junction.Logger;
 
 public class Claw extends SubsystemBase {
@@ -60,9 +58,7 @@ public class Claw extends SubsystemBase {
   }
 
   public Trigger getHasGamepieceTrigger() {
-    return new Trigger(
-      () -> getDistance().lte(SENSOR_TRIGGER_DISTANCE)
-    );
+    return new Trigger(() -> getDistance().lte(SENSOR_TRIGGER_DISTANCE));
   }
 
   @Override

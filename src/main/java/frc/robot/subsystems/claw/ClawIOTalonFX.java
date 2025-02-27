@@ -35,11 +35,11 @@ public class ClawIOTalonFX implements ClawIO {
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     config.CurrentLimits.StatorCurrentLimit = 80.0;
     config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 30.0;
+    config.CurrentLimits.SupplyCurrentLimit = 10.0;
     config.CurrentLimits.SupplyCurrentLimitEnable = true;
     config.Voltage.PeakForwardVoltage = 16.0;
     config.Voltage.PeakReverseVoltage = 16.0;
-    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     PhoenixUtil.tryUntilOk(5, () -> Motor.getConfigurator().apply(config));
   }
 

@@ -20,7 +20,7 @@ public class ClawAngle extends SubsystemBase {
   ClawAngleIOInputsAutoLogged loggedclawangle = new ClawAngleIOInputsAutoLogged();
 
   public LoggedTunableGainsBuilder tunableGains =
-      new LoggedTunableGainsBuilder("ClawAngle", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+      new LoggedTunableGainsBuilder("ClawAngle", 60, 0, 1, 0, .288, 0, 0, 300, 10, 0, 0, 0);
 
   public ClawAngle(ClawAngleIO clawAngleIO) {
     m_ClawAngleIO = clawAngleIO;
@@ -100,6 +100,13 @@ public class ClawAngle extends SubsystemBase {
               loggedclawangle.clawAngle.baseUnitMagnitude(),
               Degrees.of(0.25).baseUnitMagnitude());
         });
+  }
+
+  public boolean isClawAngleAtAngle(Angle angle, Angle tolerance) {
+    return MathUtil.isNear(
+        angle.baseUnitMagnitude(),
+        loggedclawangle.clawAngle.baseUnitMagnitude(),
+        tolerance.baseUnitMagnitude());
   }
 
   @Override

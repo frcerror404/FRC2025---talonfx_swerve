@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -35,17 +36,35 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   }
 
   private void configureTalons() {
-    TalonFXConfiguration config = new TalonFXConfiguration();
-    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    config.Voltage.PeakForwardVoltage = 12;
-    config.Voltage.PeakReverseVoltage = 12;
-    config.CurrentLimits.StatorCurrentLimit = 80;
-    config.CurrentLimits.StatorCurrentLimitEnable = true;
-    config.CurrentLimits.SupplyCurrentLimit = 40;
-    config.CurrentLimits.SupplyCurrentLimitEnable = true;
-    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    TalonFXConfiguration leaderCfg = new TalonFXConfiguration();
+    leaderCfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    leaderCfg.Voltage.PeakForwardVoltage = 12;
+    leaderCfg.Voltage.PeakReverseVoltage = 12;
+    leaderCfg.CurrentLimits.StatorCurrentLimit = 120;
+    leaderCfg.CurrentLimits.StatorCurrentLimitEnable = true;
+    leaderCfg.CurrentLimits.SupplyCurrentLimit = 20;
+    leaderCfg.CurrentLimits.SupplyCurrentLimitEnable = true;
+    leaderCfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 25;
+    leaderCfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    leaderCfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = .5;
+    leaderCfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    leaderCfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
-    config.Feedback.SensorToMechanismRatio = Elevator.REDUCTION;
+    PhoenixUtil.tryUntilOk(5, () -> leaderMotor.getConfigurator().apply(leaderCfg));
+
+    TalonFXConfiguration followerCfg = new TalonFXConfiguration();
+    followerCfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    followerCfg.Voltage.PeakForwardVoltage = 12;
+    followerCfg.Voltage.PeakReverseVoltage = 12;
+    followerCfg.CurrentLimits.StatorCurrentLimit = 120;
+    followerCfg.CurrentLimits.StatorCurrentLimitEnable = true;
+    followerCfg.CurrentLimits.SupplyCurrentLimit = 20;
+    followerCfg.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+    // config.Feedback.SensorToMechanismRatio = Elevator.REDUCTION;
+    PhoenixUtil.tryUntilOk(5, () -> followerMotor.getConfigurator().apply(followerCfg));
+
+    followerMotor.setControl(new Follower(leaderMotor.getDeviceID(), true));
   }
 
   @Override
