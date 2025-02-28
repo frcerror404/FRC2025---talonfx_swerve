@@ -33,7 +33,10 @@ import frc.robot.Constants.Mode;
 import frc.robot.commands.ClawAngleAvoidElevator;
 import frc.robot.commands.ClawAngleHome;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.IntakeAlgae;
 import frc.robot.commands.IntakeCoral;
+import frc.robot.commands.PositionAlgaeL2;
+import frc.robot.commands.PositionAlgaeL3;
 import frc.robot.commands.PositionL2;
 import frc.robot.commands.PositionL3;
 import frc.robot.commands.PositionL4;
@@ -287,14 +290,23 @@ public class RobotContainer {
         .whileTrue(new PositionL3(clawAngle, elevator))
         .whileFalse(new StowHome(elevator, clawAngle));
     operator
+        .x()
+        .whileTrue(new ClawAngleAvoidElevator(clawAngle))
+        .whileFalse(new ClawAngleHome(clawAngle));
+    operator
         .y()
         .whileTrue(new PositionL4(clawAngle, elevator))
         .whileFalse(new StowHome(elevator, clawAngle));
     operator.leftBumper().whileTrue(new IntakeCoral(claw)).whileFalse(new StopIntake(claw));
+    operator.rightBumper().whileTrue(new IntakeAlgae(claw)).whileFalse(new StopIntake(claw));
     operator
-        .rightBumper()
-        .whileTrue(new ClawAngleAvoidElevator(clawAngle))
-        .whileFalse(new ClawAngleHome(clawAngle));
+        .leftTrigger()
+        .whileTrue(new PositionAlgaeL3(clawAngle, elevator, claw))
+        .whileFalse(new StowHome(elevator, clawAngle));
+    operator
+        .rightTrigger()
+        .whileTrue(new PositionAlgaeL2(clawAngle, elevator, claw))
+        .whileFalse(new StowHome(elevator, clawAngle));
   }
 
   /**

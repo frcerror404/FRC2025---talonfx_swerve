@@ -1,24 +1,11 @@
 package frc.robot.commands;
 
-import static edu.wpi.first.units.Units.Volts;
-
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.claw.Claw;
 
-public class IntakeCoral extends Command {
-  private Claw m_claw;
-
+public class IntakeCoral extends SequentialCommandGroup {
   public IntakeCoral(Claw claw) {
-    m_claw = claw;
-
+    super(claw.getNewSetVoltsCommand(6));
     addRequirements(claw);
-  }
-
-  public void initialize() {
-    m_claw.setTarget(Volts.of(4));
-  }
-
-  public boolean isFinished() {
-    return true;
   }
 }
