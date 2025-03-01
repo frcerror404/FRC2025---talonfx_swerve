@@ -24,7 +24,7 @@ public class ClawAngleIOTalonFX implements ClawAngleIO {
   public CoastOut coastRequest;
   public TalonFX Motor;
   public CANcoder canCoder;
-  public Angle canCoderOffset = Rotations.of(0.108);
+  public Angle canCoderOffset = Rotations.of(-0.487793);
   private Angle m_setPoint = Angle.ofRelativeUnits(.0, Rotations);
 
   public ClawAngleIOTalonFX(CanDef motorId, CanDef canCoderId) {

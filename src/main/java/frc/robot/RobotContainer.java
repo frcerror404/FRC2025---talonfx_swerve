@@ -18,6 +18,7 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -33,6 +34,7 @@ import frc.robot.Constants.Mode;
 import frc.robot.commands.ClawAngleAvoidElevator;
 import frc.robot.commands.ClawAngleHome;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.ElevatorL3;
 import frc.robot.commands.IntakeAlgae;
 import frc.robot.commands.IntakeCoral;
 import frc.robot.commands.PositionAlgaeL2;
@@ -42,6 +44,7 @@ import frc.robot.commands.PositionL3;
 import frc.robot.commands.PositionL4;
 import frc.robot.commands.StopIntake;
 import frc.robot.commands.StowHome;
+import frc.robot.commands.StowHomeStopIntake;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.ClawIOSim;
@@ -61,10 +64,6 @@ import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
-import frc.robot.subsystems.vision.AprilTagVision;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.CanDef;
 import frc.robot.util.CanDef.CanBus;
 import frc.robot.util.LoggedTunableNumber;
@@ -94,7 +93,7 @@ public class RobotContainer {
   private final CommandXboxController driver = new CommandXboxController(0);
   private final CommandXboxController operator = new CommandXboxController(1);
 
-  private final AprilTagVision vision;
+  //   private final AprilTagVision vision;
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -110,6 +109,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    registerNamedCommands();
 
     CanDef.Builder canivoreCanBuilder = CanDef.builder().bus(CanBus.CANivore);
     CanDef.Builder rioCanBuilder = CanDef.builder().bus(CanBus.Rio);
@@ -125,12 +125,12 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        vision =
-            new AprilTagVision(
-                drive::setPose,
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVision(camera0Name, robotToCamera0),
-                new VisionIOPhotonVision(camera1Name, robotToCamera1));
+        // vision =
+        //     new AprilTagVision(
+        //         drive::setPose,
+        //         drive::addVisionMeasurement,
+        //         new VisionIOPhotonVision(camera0Name, robotToCamera0),
+        //         new VisionIOPhotonVision(camera1Name, robotToCamera1));
 
         elevator =
             new Elevator(
@@ -157,12 +157,12 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
 
-        vision =
-            new AprilTagVision(
-                drive::setPose,
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
-                new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
+        // vision =
+        //     new AprilTagVision(
+        //         drive::setPose,
+        //         drive::addVisionMeasurement,
+        //         new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
+        //         new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
 
         elevator =
             new Elevator(
@@ -199,9 +199,10 @@ public class RobotContainer {
                 new ModuleIO() {});
 
         // (Use same number of dummy implementations as the real robot)
-        vision =
-            new AprilTagVision(
-                drive::setPose, drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
+        // vision =
+        //     new AprilTagVision(
+        //         drive::setPose, drive::addVisionMeasurement, new VisionIO() {}, new VisionIO()
+        // {});
 
         elevator = null;
 
@@ -293,20 +294,17 @@ public class RobotContainer {
         .x()
         .whileTrue(new ClawAngleAvoidElevator(clawAngle))
         .whileFalse(new ClawAngleHome(clawAngle));
-    operator
-        .y()
-        .whileTrue(new PositionL4(clawAngle, elevator))
-        .whileFalse(new StowHome(elevator, clawAngle));
+    operator.y().onTrue(new PositionL4(clawAngle, elevator)).onFalse(new ElevatorL3(elevator));
     operator.leftBumper().whileTrue(new IntakeCoral(claw)).whileFalse(new StopIntake(claw));
     operator.rightBumper().whileTrue(new IntakeAlgae(claw)).whileFalse(new StopIntake(claw));
     operator
         .leftTrigger()
         .whileTrue(new PositionAlgaeL3(clawAngle, elevator, claw))
-        .whileFalse(new StowHome(elevator, clawAngle));
+        .whileFalse(new StowHomeStopIntake(elevator, clawAngle, claw));
     operator
         .rightTrigger()
         .whileTrue(new PositionAlgaeL2(clawAngle, elevator, claw))
-        .whileFalse(new StowHome(elevator, clawAngle));
+        .whileFalse(new StowHomeStopIntake(elevator, clawAngle, claw));
   }
 
   /**
@@ -318,13 +316,21 @@ public class RobotContainer {
     return autoChooser.get();
   }
 
+  private void registerNamedCommands() {
+    NamedCommands.registerCommand("IntakeCoral", new IntakeCoral(claw));
+    NamedCommands.registerCommand("StowHomeStopIntake", new StowHomeStopIntake(elevator, clawAngle, claw));
+    NamedCommands.registerCommand("RaiseL2", new PositionL2(clawAngle, elevator));
+    NamedCommands.registerCommand("RaiseL3", new PositionL3(clawAngle, elevator));
+    NamedCommands.registerCommand("RaiseL4", new PositionL4(clawAngle, elevator));
+  }
+
   public void teleopInit() {
     if (!this.m_TeleopInitialized) {
       // Only want to initialize starting position once (if teleop multiple times dont reset pose
       // again)
-      vision.updateStartingPosition();
+      //   vision.updateStartingPosition();
       // Turn on updating odometry based on Apriltags
-      vision.enableUpdateOdometryBasedOnApriltags();
+      //   vision.enableUpdateOdometryBasedOnApriltags();
       m_TeleopInitialized = true;
       SignalLogger.setPath("/media/sda1/");
       SignalLogger.start();

@@ -3,48 +3,53 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 7.0
+        "x": 15.967622950822024,
+        "y": 7.159784836058493
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.013282910175676,
-        "y": 6.5274984191074985
+        "x": 12.796718159377724,
+        "y": 6.111528118620898
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "RightPickup"
     },
     {
       "anchor": {
-        "x": 5.166769560390973,
-        "y": 5.0964860911203305
+        "x": 11.891803278688524,
+        "y": 5.901075819672131
       },
       "prevControl": {
-        "x": 4.166769560390973,
-        "y": 6.0964860911203305
+        "x": 12.261442419483457,
+        "y": 6.160968867132707
       },
       "nextControl": {
-        "x": 6.166769560390973,
-        "y": 4.0964860911203305
+        "x": 11.452054020680716,
+        "y": 5.59188839288504
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "AvoidReef"
     },
     {
       "anchor": {
-        "x": 7.0,
-        "y": 1.0
+        "x": 10.159500000000001,
+        "y": 4.0055
       },
       "prevControl": {
-        "x": 6.75,
-        "y": 2.5
+        "x": 11.188327683169275,
+        "y": 4.943201126503092
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "Start/End"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.0,
+      "rotationDegrees": 52.59464336918513
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -64,7 +69,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 55.007979802222714
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }

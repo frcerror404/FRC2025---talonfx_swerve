@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -20,12 +19,12 @@ public class ClawIOTalonFX implements ClawIO {
 
   private Voltage m_setPoint = Voltage.ofBaseUnits(0, Volts);
 
-  private CANrange m_sensor;
+  // private CANrange m_sensor;
 
   public ClawIOTalonFX(CanDef canbus, CanDef sensorCanDef) {
     Motor = new TalonFX(canbus.id(), canbus.bus());
     Request = new VoltageOut(0.0);
-    m_sensor = new CANrange(sensorCanDef.id(), sensorCanDef.bus());
+    // m_sensor = new CANrange(sensorCanDef.id(), sensorCanDef.bus());
 
     configureTalons();
   }
@@ -65,6 +64,6 @@ public class ClawIOTalonFX implements ClawIO {
 
   @Override
   public Distance getDistance() {
-    return m_sensor.getDistance().getValue();
+    return Inches.of(0); // m_sensor.getDistance().getValue();
   }
 }
