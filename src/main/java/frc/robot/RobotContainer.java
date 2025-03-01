@@ -45,6 +45,7 @@ import frc.robot.commands.PositionL4;
 import frc.robot.commands.StopIntake;
 import frc.robot.commands.StowHome;
 import frc.robot.commands.StowHomeStopIntake;
+import frc.robot.commands.StowProcessor;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.claw.Claw;
 import frc.robot.subsystems.claw.ClawIOSim;
@@ -109,7 +110,6 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    registerNamedCommands();
 
     CanDef.Builder canivoreCanBuilder = CanDef.builder().bus(CanBus.CANivore);
     CanDef.Builder rioCanBuilder = CanDef.builder().bus(CanBus.Rio);
@@ -213,6 +213,8 @@ public class RobotContainer {
         clawAngle = null;
     }
 
+    registerNamedCommands();
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -246,9 +248,16 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     // Default command, normal field-relative drive
+
+    double driveGain = 0.9;
+    double steerGain = 0.85;
+
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
-            drive, () -> -driver.getLeftY(), () -> -driver.getLeftX(), () -> -driver.getRightX()));
+            drive,
+            () -> -driver.getLeftY() * driveGain,
+            () -> -driver.getLeftX() * driveGain,
+            () -> -driver.getRightX() * steerGain));
 
     // co_controller.rightTrigger().whileTrue(elevator.getNewSetDistanceCommand(set));
 
@@ -286,6 +295,8 @@ public class RobotContainer {
         .a()
         .whileTrue(new PositionL2(clawAngle, elevator))
         .whileFalse(new StowHome(elevator, clawAngle));
+
+    driver.a().onTrue(new StowHomeStopIntake(elevator, clawAngle, claw));
     operator
         .b()
         .whileTrue(new PositionL3(clawAngle, elevator))
@@ -294,17 +305,17 @@ public class RobotContainer {
         .x()
         .whileTrue(new ClawAngleAvoidElevator(clawAngle))
         .whileFalse(new ClawAngleHome(clawAngle));
-    operator.y().onTrue(new PositionL4(clawAngle, elevator)).onFalse(new ElevatorL3(elevator));
+    operator.y().onTrue(new PositionL4(clawAngle, elevator)).whileFalse(new ElevatorL3(elevator));
     operator.leftBumper().whileTrue(new IntakeCoral(claw)).whileFalse(new StopIntake(claw));
     operator.rightBumper().whileTrue(new IntakeAlgae(claw)).whileFalse(new StopIntake(claw));
     operator
         .leftTrigger()
         .whileTrue(new PositionAlgaeL3(clawAngle, elevator, claw))
-        .whileFalse(new StowHomeStopIntake(elevator, clawAngle, claw));
+        .whileFalse(new StowProcessor(elevator, clawAngle));
     operator
         .rightTrigger()
         .whileTrue(new PositionAlgaeL2(clawAngle, elevator, claw))
-        .whileFalse(new StowHomeStopIntake(elevator, clawAngle, claw));
+        .whileFalse(new StowProcessor(elevator, clawAngle));
   }
 
   /**
@@ -318,7 +329,8 @@ public class RobotContainer {
 
   private void registerNamedCommands() {
     NamedCommands.registerCommand("IntakeCoral", new IntakeCoral(claw));
-    NamedCommands.registerCommand("StowHomeStopIntake", new StowHomeStopIntake(elevator, clawAngle, claw));
+    NamedCommands.registerCommand(
+        "StowHomeStopIntake", new StowHomeStopIntake(elevator, clawAngle, claw));
     NamedCommands.registerCommand("RaiseL2", new PositionL2(clawAngle, elevator));
     NamedCommands.registerCommand("RaiseL3", new PositionL3(clawAngle, elevator));
     NamedCommands.registerCommand("RaiseL4", new PositionL4(clawAngle, elevator));

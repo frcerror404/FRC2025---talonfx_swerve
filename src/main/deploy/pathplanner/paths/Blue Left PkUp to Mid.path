@@ -3,45 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 10.159500000000001,
-        "y": 4.0055
+        "x": 1.4984631147540983,
+        "y": 0.8662397540983602
       },
       "prevControl": null,
       "nextControl": {
-        "x": 10.72543906009529,
-        "y": 4.559743653160361
+        "x": 2.57735655737705,
+        "y": 1.0340676229508199
       },
       "isLocked": false,
-      "linkedName": "Start/End"
+      "linkedName": "B Left Pickup"
     },
     {
       "anchor": {
-        "x": 11.891803278688524,
-        "y": 5.901075819672131
+        "x": 4.531352459016393,
+        "y": 1.4416495901639348
       },
       "prevControl": {
-        "x": 11.665747153091909,
-        "y": 5.794311461947996
+        "x": 3.464446721311475,
+        "y": 1.1059938524590154
       },
       "nextControl": {
-        "x": 12.61943731504542,
-        "y": 6.2447310970720835
+        "x": 5.300831793773549,
+        "y": 1.6837329763796702
       },
       "isLocked": false,
-      "linkedName": "AvoidReef"
+      "linkedName": "B Left AvoidReef"
     },
     {
       "anchor": {
-        "x": 15.967622950822024,
-        "y": 7.159784836058493
+        "x": 7.480327868852459,
+        "y": 3.9350922131147543
       },
       "prevControl": {
-        "x": 14.049378977243094,
-        "y": 6.5472987220480885
+        "x": 6.677151639344262,
+        "y": 3.2877561475409824
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "RightPickup"
+      "linkedName": "B Start/End"
     }
   ],
   "rotationTargets": [],
@@ -58,13 +58,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 55.007979802222714
+    "rotation": 180.0
   },
   "reversed": false,
-  "folder": "Red Paths",
+  "folder": "Blue Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -127.11686068327027
   },
   "useDefaultConstraints": true
 }

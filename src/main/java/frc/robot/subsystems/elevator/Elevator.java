@@ -26,7 +26,7 @@ public class Elevator extends SubsystemBase {
   public static final double REDUCTION = (5.0 / 1.0); // 5:1 Reduction
 
   public LoggedTunableGainsBuilder tunableGains =
-      new LoggedTunableGainsBuilder("Elevator", 8.0, 2, 0, 0, 0.72, 0, 0, 80.0, 90.0, 0, 0, 0);
+      new LoggedTunableGainsBuilder("Elevator", 8.0, 2, 0, 0, 0.72, 0, 0, 65.0, 90.0, 0, 0, 0);
 
   public Elevator(ElevatorIO ElevatorIO) {
     m_ElevatorIO = ElevatorIO;
@@ -48,6 +48,10 @@ public class Elevator extends SubsystemBase {
 
   public void setDistance(Distance target) {
     m_ElevatorIO.setTarget(target);
+  }
+
+  public void setDistance(Distance target, boolean isSlow) {
+    m_ElevatorIO.setTarget(target, isSlow);
   }
 
   public Command getNewSetDistanceCommand(DoubleSupplier distance) {

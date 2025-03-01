@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red Lft Move "
+            "pathName": "Blue Lft Move "
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "Red Autos",
+  "folder": "Blue Autos",
   "choreoAuto": false
 }

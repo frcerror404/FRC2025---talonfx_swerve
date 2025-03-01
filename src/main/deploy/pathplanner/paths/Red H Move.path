@@ -8,40 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 10.72543906009529,
-        "y": 4.559743653160361
+        "x": 10.454573922548692,
+        "y": 4.0055
       },
       "isLocked": false,
       "linkedName": "Start/End"
     },
     {
       "anchor": {
-        "x": 11.891803278688524,
-        "y": 5.901075819672131
+        "x": 10.83629716981132,
+        "y": 4.0055
       },
       "prevControl": {
-        "x": 11.665747153091909,
-        "y": 5.794311461947996
-      },
-      "nextControl": {
-        "x": 12.61943731504542,
-        "y": 6.2447310970720835
-      },
-      "isLocked": false,
-      "linkedName": "AvoidReef"
-    },
-    {
-      "anchor": {
-        "x": 15.967622950822024,
-        "y": 7.159784836058493
-      },
-      "prevControl": {
-        "x": 14.049378977243094,
-        "y": 6.5472987220480885
+        "x": 10.414070068554665,
+        "y": 4.0055
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "RightPickup"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -58,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 55.007979802222714
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": "Red Paths",

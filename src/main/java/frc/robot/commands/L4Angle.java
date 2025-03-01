@@ -12,7 +12,7 @@ public class L4Angle extends Command {
 
   public L4Angle(ClawAngle clawAngle) {
     m_ClawAngle = clawAngle;
-    m_angle = Degrees.of(-105);
+    m_angle = Degrees.of(-90);
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(m_ClawAngle);

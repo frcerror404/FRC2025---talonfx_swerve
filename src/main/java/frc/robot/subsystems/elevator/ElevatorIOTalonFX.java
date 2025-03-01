@@ -86,6 +86,13 @@ public class ElevatorIOTalonFX implements ElevatorIO {
   }
 
   @Override
+  public void setTarget(Distance target, boolean isSlow) {
+    Request = Request.withPosition(target.in(Inches) / Elevator.INCHES_PER_ROT).withSlot(0);
+    leaderMotor.setControl(Request);
+    m_setPoint = target;
+  }
+
+  @Override
   public void stop() {
     leaderMotor.setControl(new StaticBrake());
   }

@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 9.722028688524588,
-        "y": 4.678329918032786
+        "x": 10.860860655737703,
+        "y": 4.558452868852458
       },
-      "isLocked": true,
+      "isLocked": false,
       "linkedName": "Start/End"
     },
     {
       "anchor": {
-        "x": 9.997745901639345,
-        "y": 6.488473360655737
+        "x": 11.640061475409833,
+        "y": 5.68529713114754
       },
       "prevControl": {
-        "x": 9.941531024964656,
-        "y": 6.24487556173208
+        "x": 11.26844262295082,
+        "y": 5.097899590163934
       },
       "nextControl": {
-        "x": 10.141598360655736,
-        "y": 7.111834016393442
+        "x": 11.982095157596648,
+        "y": 6.225931015894446
       },
       "isLocked": false,
       "linkedName": null
@@ -36,11 +36,11 @@
         "y": 7.339600409836065
       },
       "prevControl": {
-        "x": 10.513217213114753,
-        "y": 7.027920081967213
+        "x": 11.328381147540984,
+        "y": 6.740215163934426
       },
       "nextControl": null,
-      "isLocked": true,
+      "isLocked": false,
       "linkedName": "Safe Right"
     }
   ],
@@ -61,7 +61,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Red Paths",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

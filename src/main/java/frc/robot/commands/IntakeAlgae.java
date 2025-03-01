@@ -5,7 +5,7 @@ import frc.robot.subsystems.claw.Claw;
 
 public class IntakeAlgae extends SequentialCommandGroup {
   public IntakeAlgae(Claw claw) {
-    super(claw.getNewSetVoltsCommand(-6));
+    super(claw.getNewSetVoltsCommand(-10));
     addRequirements(claw);
   }
 }

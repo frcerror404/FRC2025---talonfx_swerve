@@ -38,6 +38,12 @@ public class ElevatorIOSim implements ElevatorIO {
     controller.setGoal(target.in(Inches));
   }
 
+  @Override
+  public void setTarget(Distance target, boolean isSlow) {
+    this.target = target;
+    controller.setGoal(target.in(Inches));
+  }
+
   private void updateVoltageSetpoint() {
     Distance currentPosition = Meters.of(sim.getPositionMeters());
     LinearVelocity currentVelocity = MetersPerSecond.of(sim.getVelocityMetersPerSecond());

@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red Mid To H"
+            "pathName": "Blue Left to H "
           }
         },
         {
@@ -63,13 +63,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red H To Mid"
+            "pathName": "Blue H to Left "
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Blue Autos",
   "choreoAuto": false
 }

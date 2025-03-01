@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red Mid to Rgt PkUp"
+            "pathName": "Blue Mid to Left PkUp"
           }
         },
         {
@@ -32,13 +32,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red Rgt PkUp to Mid"
+            "pathName": "Blue Left PkUp to Mid"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "Red Autos",
+  "folder": "Blue Autos",
   "choreoAuto": false
 }

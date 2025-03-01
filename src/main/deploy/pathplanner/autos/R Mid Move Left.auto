@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red Mid Safe Right "
+            "pathName": "Red Mid Safe Left "
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Red Autos",
   "choreoAuto": false
 }

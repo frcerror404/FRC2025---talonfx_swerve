@@ -7,13 +7,38 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red C to Lft PkUp"
+            "pathName": "Red Mid to Left PkUp"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeCoral"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 2.5
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Red Left PkUp to Mid"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Red Autos",
   "choreoAuto": false
 }
